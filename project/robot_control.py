@@ -77,7 +77,7 @@ def stop():
     full_speed(2,0)
     full_speed(1,0)
 
-FIFO = '/home/pi/project/robot_fifo'
+FIFO = '/home/pi/WifiRobot/project/robot_fifo'
 
 try :
     run = True

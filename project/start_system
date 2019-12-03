@@ -1,0 +1,6 @@
+#!/bin/bash
+
+python rpi_camera.py &
+python client.py &
+python move_robot.py
+

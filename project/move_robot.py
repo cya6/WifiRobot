@@ -1,7 +1,7 @@
 import os
 import atexit
 
-FIFO = '/home/pi/project/robot_fifo'
+FIFO = '/home/pi/WifiRobot/project/robot_fifo'
 
 with open(FIFO) as fifo :
     while True:

@@ -43,7 +43,7 @@ def full_speed (servo, direction) :
             p1.ChangeDutyCycle(stop_d) 
             p1.ChangeFrequency(stop_f) 
         if ( servo == 2 ):
-            p1.ChangeDutyCycle(stop_d)
+            p2.ChangeDutyCycle(stop_d)
             p2.ChangeFrequency(stop_f)
     if ( direction == -1 ) :
         if ( servo == 1 ) :
@@ -82,47 +82,58 @@ FIFO = '/home/pi/WifiRobot/project/robot_fifo'
 try :
     run = True
     fifo = open(FIFO)
-    x = 0 
     y = 0
     z = 0
+    fw_bw = 0
+    lf_rg = 0
+
     while run :
         time.sleep(0.2)
+        #Read from FIFO
         while True:                              
             line = fifo.read()
             if len(line) > 2 :
+                
+                #Move robot according to accelerometer readings
                 split_line =  line.split( "\n" )
                 for l in split_line :
                     t = l.split(":")
+
+                    #Move forward or backwards depending on the ZValue
                     if ( t[0] == "zValue" ) :
                         z = float(t[1])
                         if ( z > 2 ) :
-                            z = 1
-                            forward()
-                            print ("forward\n")
+                            fw_bw = fw_bw + 1
+                            if ( fw_bw > 3 ) :
+                                forward()
+                                print ("forward\n")
                         elif ( z < -1 ):
-                            z = -1
-                            backward()
-                            print ("backward\b")
+                            fw_bw = fw_bw + 1
+                            if ( fw_bw > 3 ) :
+                                backward()
+                                print ("backward\n")
                         else :
-                            z = 0 
-                            if ( x == 0 ) :
+                            fw_bw = 0
+                            if ( lf_rg == 0 ) :
                                 stop()
                                 print ("still\n")
+
+                    #Move left or right
                     elif ( t[0] == "yValue" ):
-                        x = float(t[1])
-                        if ( x < -0.5 ) :
-                            x = 1
-                            right_turn()
-                            forward()
-                            print ("right")
-                        elif ( x > 0.7 ):
-                            x = -1
-                            left_turn()
-                            forward()
-                            print ("left")
+                        y = float(t[1])
+                        if ( y < -0.5 ) :
+                            lf_rg = lf_rg + 1
+                            if ( lf_rg > 3 ) : 
+                                right_turn()
+                                print ("right")
+                        elif ( y > 0.7 ):
+                            lf_rg = lf_rg + 1
+                            if ( lf_rg > 3 ) :
+                                left_turn()
+                                print ("left")
                         else :
-                            x = 0
-                            if ( z == 0 ) :
+                            lf_rg = 0
+                            if ( fw_bw == 0 ) :
                                 stop()
                                 print ("still")
 

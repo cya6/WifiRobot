@@ -7,7 +7,7 @@ import time
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-HOST = '10.132.0.42'  # The server's hostname or IP address
+HOST = '10.132.9.202'  # The server's hostname or IP address
 PORT = 2000        # The port used by the server
 
 time.sleep(7)

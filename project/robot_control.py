@@ -28,16 +28,20 @@ p2.start(0)
 #--------------------------------------------------
 
 #Screen Init--------------------------------------
+for_1_d = 1.65/21.65
+for_1_f = 1/0.02165
+back_1_d = 1.38/21.38
+back_1_f = 1/0.02138
 
 #direction clockwise = 1, stop = 0, counter = -1
 def full_speed (servo, direction) :
     if ( direction == 1 ) :
         if ( servo == 1 ) :
-            p1.ChangeDutyCycle((1.7/21.7)*100)
-            p1.ChangeFrequency(1/0.0217)
+            p1.ChangeDutyCycle(for_1_d*100)
+            p1.ChangeFrequency(for_1_f)
         if ( servo == 2 ):
-            p2.ChangeDutyCycle((1.3/21.3)*100) 
-            p2.ChangeFrequency(1/0.0213)
+            p2.ChangeDutyCycle(back_1_d*100) 
+            p2.ChangeFrequency(back_1_f)
     if ( direction == 0 ) :
         if ( servo == 1 ) :
             p1.ChangeDutyCycle(stop_d) 
@@ -47,15 +51,15 @@ def full_speed (servo, direction) :
             p2.ChangeFrequency(stop_f)
     if ( direction == -1 ) :
         if ( servo == 1 ) :
-            p1.ChangeDutyCycle((1.3/21.3)*100)
-            p1.ChangeFrequency(1/0.0213)
+            p1.ChangeDutyCycle(back_1_d*100)
+            p1.ChangeFrequency(back_1_f)
         if ( servo == 2 ) :
-            p2.start((1.7/21.7)*100) 
-            p2.ChangeFrequency(1/0.0217)
+            p2.start(for_1_d*100) 
+            p2.ChangeFrequency(for_1_f)
 
 def left_turn():
     start = time.time()
-    while ( time.time() - start < 1.3 ) :
+    while ( time.time() - start < 0.5 ) :
         full_speed(1, 0)
         full_speed(2, 1)
 
@@ -69,7 +73,7 @@ def backward():
 
 def right_turn():
     start = time.time()
-    while ( time.time() - start < 1.3) :
+    while ( time.time() - start < 0.5) :
         full_speed(2,0)
         full_speed(1,1)
 
@@ -78,11 +82,12 @@ def stop():
     full_speed(1,0)
 
 FIFO = '/home/pi/WifiRobot/project/robot_fifo'
-
+cal = 30
+still = 0
 try :
     run = True
     fifo = open(FIFO)
-    y = 0
+    side = 0
     z = 0
     fw_bw = 0
     lf_rg = 0
@@ -98,18 +103,25 @@ try :
                 split_line =  line.split( "\n" )
                 for l in split_line :
                     t = l.split(":")
+                    
+                    if cal > 0 :
+                        if ( t[0] == "zValue") :
+                            still_z = float(t[1]) 
+                        elif ( t[0] == "xValue" ) :
+                            still_x = float(t[1]);
+                        cal = cal - 1;
 
                     #Move forward or backwards depending on the ZValue
-                    if ( t[0] == "zValue" ) :
+                    elif ( t[0] == "zValue" ) :
                         z = float(t[1])
-                        if ( z > 2 ) :
+                        if ( (z > still_z + 0.1) and (side < still_x - 0.1) ) :
                             fw_bw = fw_bw + 1
-                            if ( fw_bw > 3 ) :
+                            if ( fw_bw > 2 ) :
                                 forward()
                                 print ("forward\n")
-                        elif ( z < -1 ):
+                        elif ( (z < still_z - 0.1) and (side > still_x + 0.1)):
                             fw_bw = fw_bw + 1
-                            if ( fw_bw > 3 ) :
+                            if ( fw_bw > 2 ) :
                                 backward()
                                 print ("backward\n")
                         else :
@@ -119,23 +131,27 @@ try :
                                 print ("still\n")
 
                     #Move left or right
-                    elif ( t[0] == "yValue" ):
-                        y = float(t[1])
-                        if ( y < -0.5 ) :
+                    elif ( t[0] == "xValue" and fw_bw == 0 ):
+
+                        print("legal turn, x= "+(str(t[1])))
+                        side = float(t[1])
+                        if ( side < still_x - 0.1 ) :
                             lf_rg = lf_rg + 1
-                            if ( lf_rg > 3 ) : 
+                            if ( lf_rg > 2 ) : 
                                 right_turn()
-                                print ("right")
-                        elif ( y > 0.7 ):
+                                lf_rg = 0 
+                                print ("right\n")
+                        elif ( side >= still_x + 0.05 ):
                             lf_rg = lf_rg + 1
-                            if ( lf_rg > 3 ) :
+                            if ( lf_rg > 2 ) :
                                 left_turn()
-                                print ("left")
+                                lf_rg= 0
+                                print ("left\n")
                         else :
                             lf_rg = 0
                             if ( fw_bw == 0 ) :
                                 stop()
-                                print ("still")
+                                print ("still\n")
 
             
 

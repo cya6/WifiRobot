@@ -15,6 +15,10 @@ PAGE="""\
 </head>
 <body>
 <center><img src="stream.mjpg" width="640" height="350"></center>
+<audio src="http://10.148.12.247:8000/rapi.mp3"
+controls autoplay>
+<p>Audio is not working.</p>
+</audio>
 </body>
 </html>
 """

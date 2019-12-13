@@ -27,8 +27,6 @@ p2 = GPIO.PWM(5, 46.1)
 p2.start(0)
 #--------------------------------------------------
 
-#Screen Init--------------------------------------
-
 #direction clockwise = 1, stop = 0, counter = -1
 def full_speed (servo, direction) :
     if ( direction == 1 ) :
